@@ -10,9 +10,9 @@ class NormalParser:
         pass
 
     @staticmethod
-    def parse_with_translate(origin_lyrics: str, trans_lyrics: str, interval=0):
+    def parse_with_translate(origin_lyrics: str, *trans_lyrics: str, interval=0):
         origin_lyrics_list = origin_lyrics.split("\n")
-        trans_lyrics_list = trans_lyrics.split("\n")
+        trans_lyrics_list = [trans_lyric.split("\n") for trans_lyric in trans_lyrics]
 
         origin_obj_list = []
         trans_obj_list = []
@@ -24,13 +24,13 @@ class NormalParser:
                 if len(match_result[0]) == 4:
                     origin_obj_list.append(NormalLyricLine(origin))
             except IndexError: pass
-
-        for origin in trans_lyrics_list:
-            match_result = re.findall(r"\[(\d{2}):(\d{2})\.(\d{1,3})\](.*)", origin)
-            try: 
-                if len(match_result[0]) == 4:
-                    trans_obj_list.append(NormalLyricLine(origin))
-            except IndexError: pass
+        for trans in trans_lyrics_list:
+            for origin in trans:
+                match_result = re.findall(r"\[(\d{2}):(\d{2})\.(\d{1,3})\](.*)", origin)
+                try: 
+                    if len(match_result[0]) == 4:
+                        trans_obj_list.append(NormalLyricLine(origin))
+                except IndexError: pass
 
         for origin in origin_obj_list: 
             trans = list(filter(lambda x: abs(origin.play_time - x.play_time) <= interval, trans_obj_list))
@@ -44,9 +44,9 @@ class EnhancedParser:
         pass
 
     @staticmethod
-    def parse_with_translate(origin_lyrics: str, trans_lyrics: str, interval=0):
+    def parse_with_translate(origin_lyrics: str, *trans_lyrics: str, interval=0):
         origin_lyrics_list = origin_lyrics.split("\n")
-        trans_lyrics_list = trans_lyrics.split("\n")
+        trans_lyrics_list = trans_lyrics_list = [trans_lyric.split("\n") for trans_lyric in trans_lyrics]
 
         origin_obj_list = []
         trans_obj_list = []
@@ -59,13 +59,13 @@ class EnhancedParser:
             if match_result != []:
                 origin_obj_list.append(EnhancedLyricLine(origin))
            
-
-        for origin in trans_lyrics_list:
-            match_result = re.findall(r"\[(\d{2}):(\d{2})\.(\d{1,3})\](.*)", origin)
-            try: 
-                if len(match_result[0]) == 4:
-                    trans_obj_list.append(NormalLyricLine(origin))
-            except IndexError: pass
+        for trans in trans_lyrics_list:
+            for origin in trans:
+                match_result = re.findall(r"\[(\d{2}):(\d{2})\.(\d{1,3})\](.*)", origin)
+                try: 
+                    if len(match_result[0]) == 4:
+                        trans_obj_list.append(NormalLyricLine(origin))
+                except IndexError: pass
 
         for origin in origin_obj_list: 
             trans = list(filter(lambda x: abs(origin.play_time - x.play_time) <= interval, trans_obj_list))
@@ -80,12 +80,14 @@ class EnhancedParser:
 
 
 if __name__ == "__main__": 
-    with open(r"d:\ncm\v6.3-green\MIMI,重音テト - サイエンス (feat. 重音テト) - 0.lrc", "r", encoding="utf-8") as f: 
+    with open(r"d:\ncm\鹿乃,Lon,hanser - 爱言叶Ⅳo.lrc", "r", encoding="utf-8") as f: 
         ori = f.read()
-    with open(r"d:\ncm\v6.3-green\MIMI,重音テト - サイエンス (feat. 重音テト) - 1.lrc", "r", encoding="utf-8") as f: 
+    with open(r"d:\ncm\鹿乃,Lon,hanser - 爱言叶Ⅳ - 1.lrc", "r", encoding="utf-8") as f: 
         trans = f.read()
-    a = EnhancedParser.parse_with_translate(ori, trans, interval=10)
+    with open(r"d:\ncm\鹿乃,Lon,hanser - 爱言叶Ⅳ - 2.lrc", "r", encoding="utf-8") as f: 
+        roma = f.read()
+    a = EnhancedParser.parse_with_translate(ori, trans, roma, interval=10)
     a.sort()
-    with open(r"d:\ncm\v6.3-green\MIMI,重音テト - サイエンス (feat. 重音テト) - com.lrc", "w", encoding="utf-8") as f: 
+    with open(r"d:\ncm\v6.3-green\鹿乃,Lon,hanser - 爱言叶Ⅳ - com.lrc", "w", encoding="utf-8") as f: 
 
         f.write(a.tostr(lrc_type=TranslateExportType.INTERLACED))

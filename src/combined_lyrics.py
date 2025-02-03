@@ -13,9 +13,9 @@ class CombinedLyrics:
         
     def tostr(self) -> str: 
         """返回字符串, 类型默认为交错"""
-        translate_str = "\n".join([i.tostr() for i in self.translate_lyrics])
+        translate_str = "\n".join([i.tostr() if i.lyric != r"//" else "" for i in self.translate_lyrics])
         origin_str = self.origin_lyric.tostr()
-        if origin_str != translate_str and translate_str != "": 
+        if origin_str != translate_str and translate_str != "" and translate_str != r"//": 
             return f"{origin_str}\n{translate_str}"
         else: 
             return origin_str
